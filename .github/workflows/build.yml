@@ -25,6 +25,9 @@ jobs:
       with:
         flutter-version: '3.19.6'
 
+    - name: Générer automatiquement les dossiers natifs (Android)
+      run: flutter create . --platforms=android
+
     - name: Installer les dépendances
       run: flutter pub get
 
@@ -36,3 +39,4 @@ jobs:
       with:
         name: application-apk
         path: build/app/outputs/flutter-apk/app-release.apk
+        
