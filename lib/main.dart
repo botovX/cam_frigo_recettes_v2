@@ -9,7 +9,7 @@ void main() {
 
 class ApiService {
   // COLLE TA CLÉ API GEMINI JUSTE ENTRE LES GUILLEMETS ICI :
-  static const String _apiKey = "METS_TA_VRAIE_CLE_ICI";
+  static const String _apiKey = "AQ.Ab8RN6IZEEdi8hnMpxYTE4zEsn8VXf8pdpcpYIP-7DlWf1Jh5g";
 
   static Future<String> genererRecettes(Uint8List imageBytes) async {
     try {
