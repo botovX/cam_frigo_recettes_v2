@@ -1,3 +1,7 @@
+// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_literals_to_create_immutables
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material';
@@ -119,7 +123,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Mon Frigo Intelligent 🍳"),
+        title: Text("Mon Frigo Intelligent 🍳"),
         backgroundColor: const Color(0xFF1E1E1E),
         centerTitle: true,
         elevation: 0,
@@ -137,7 +141,7 @@ class _HomePageState extends State<HomePage> {
                 color: const Color(0xFF1E1E1E),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(Icons.camera_alt_outlined, size: 60, color: Color(0xFF00C853)),
+              child: Icon(Icons.camera_alt_outlined, size: 60, color: Color(0xFF00C853)),
             ),
             const SizedBox(height: 25),
             ElevatedButton(
