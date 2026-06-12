@@ -1,7 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-// ignore_for_file: prefer_const_literals_to_create_immutables
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material';
@@ -22,7 +18,13 @@ class ApiService {
 
       final String base64Image = base64Encode(imageBytes);
 
-      final Map<String, dynamic> corpsRequete = {
+      // Déclaration d'un type strict requis par le compilateur en mode Release
+      final Map<String, String> entetes = {
+        "Content-Type": "application/json",
+      };
+
+      // Payload JSON linéarisé de force pour éviter le crash du Kernel Snapshot
+      final String corpsContenu = jsonEncode({
         "contents": [
           {
             "parts": [
@@ -38,39 +40,33 @@ class ApiService {
             ]
           }
         ]
-      };
+      });
 
       final http.Response response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(corpsRequete),
+        headers: entetes,
+        body: corpsContenu,
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        final List<dynamic> candidates = jsonResponse['candidates'] as List<dynamic>;
         
-        if (jsonResponse.containsKey('candidates')) {
-          final List<dynamic> candidates = jsonResponse['candidates'] as List<dynamic>;
-          if (candidates.isNotEmpty) {
-            final Map<String, dynamic> firstCandidate = candidates[0] as Map<String, dynamic>;
-            if (firstCandidate.containsKey('content')) {
-              final Map<String, dynamic> content = firstCandidate['content'] as Map<String, dynamic>;
-              if (content.containsKey('parts')) {
-                final List<dynamic> parts = content['parts'] as List<dynamic>;
-                if (parts.isNotEmpty) {
-                  final Map<String, dynamic> firstPart = parts[0] as Map<String, dynamic>;
-                  return firstPart['text']?.toString() ?? "L'IA n'a pas renvoyé de texte.";
-                }
-              }
-            }
+        if (candidates.isNotEmpty) {
+          final Map<String, dynamic> firstCandidate = candidates[0] as Map<String, dynamic>;
+          final Map<String, dynamic> content = firstCandidate['content'] as Map<String, dynamic>;
+          final List<dynamic> parts = content['parts'] as List<dynamic>;
+          
+          if (parts.isNotEmpty) {
+            final Map<String, dynamic> firstPart = parts[0] as Map<String, dynamic>;
+            return firstPart['text']?.toString() ?? "L'IA n'a pas renvoyé de texte.";
           }
         }
-        return "Format de réponse Gemini non reconnu.";
-      } else {
-        return "Erreur du serveur Gemini (Code: ${response.statusCode})";
+        return "Format de réponse inconnu.";
       }
+      return "Erreur Gemini (Code: ${response.statusCode})";
     } catch (e) {
-      return "Erreur de connexion internet : $e";
+      return "Erreur de connexion : ${e.toString()}";
     }
   }
 }
@@ -110,7 +106,6 @@ class _HomePageState extends State<HomePage> {
     });
 
     final Uint8List fauxPixel = Uint8List.fromList([71, 73, 70, 56, 57, 97, 1, 0, 1, 0, 128, 0, 0, 0, 0, 0, 255, 255, 255, 33, 249, 4, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 2, 68, 1, 0, 59]);
-    
     final String resultat = await ApiService.envoyerPhotoFrigo(fauxPixel);
 
     setState(() {
@@ -123,7 +118,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Mon Frigo Intelligent 🍳"),
+        title: const Text("Mon Frigo Intelligent 🍳"),
         backgroundColor: const Color(0xFF1E1E1E),
         centerTitle: true,
         elevation: 0,
@@ -141,7 +136,7 @@ class _HomePageState extends State<HomePage> {
                 color: const Color(0xFF1E1E1E),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(Icons.camera_alt_outlined, size: 60, color: Color(0xFF00C853)),
+              child: const Icon(Icons.camera_alt_outlined, size: 60, color: Color(0xFF00C853)),
             ),
             const SizedBox(height: 25),
             ElevatedButton(
@@ -154,7 +149,6 @@ class _HomePageState extends State<HomePage> {
               child: Text(_chargement ? "Analyse en cours..." : "Générer mes recettes"),
             ),
             const SizedBox(height: 30),
-            const SizedBox(height: 15),
             SelectionArea(
               child: Align(
                 alignment: Alignment.centerLeft,
