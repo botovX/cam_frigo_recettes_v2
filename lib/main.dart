@@ -44,8 +44,21 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        return jsonResponse['candidates'][0]['content']['parts'][0]['text'] ?? "L'IA a renvoyé une réponse vide.";
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        
+        // Extraction ultra-sécurisée par étapes pour esquiver le bug du compilateur
+        if (jsonResponse.containsKey('candidates') && jsonResponse['candidates'].isNotEmpty) {
+          final candidate = jsonResponse['candidates'][0];
+          if (candidate.containsKey('content') && candidate['content'].containsKey('parts')) {
+            final parts = candidate['content']['parts'];
+            if (parts.isNotEmpty) {
+              // On récupère la valeur de manière dynamique
+              final dynamic texteExtrait = parts[0]['text'];
+              return texteExtrait?.toString() ?? "Aucun texte trouvé.";
+            }
+          }
+        }
+        return "Format de réponse inconnu.";
       } 
       return "Erreur Gemini (Code ${response.statusCode})";
     } catch (e) {
