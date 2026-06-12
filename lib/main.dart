@@ -8,7 +8,6 @@ void main() {
 }
 
 class ApiService {
-  // COLLE TA CLÉ API GEMINI JUSTE ENTRE LES GUILLEMETS ICI :
   static const String _apiKey = "AQ.Ab8RN6IZEEdi8hnMpxYTE4zEsn8VXf8pdpcpYIP-7DlWf1Jh5g";
 
   static Future<String> genererRecettes(Uint8List imageBytes) async {
@@ -45,14 +44,11 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        
-        // Extraction ultra-sécurisée par étapes pour esquiver le bug du compilateur
         if (jsonResponse.containsKey('candidates') && jsonResponse['candidates'].isNotEmpty) {
           final candidate = jsonResponse['candidates'][0];
           if (candidate.containsKey('content') && candidate['content'].containsKey('parts')) {
             final parts = candidate['content']['parts'];
             if (parts.isNotEmpty) {
-              // On récupère la valeur de manière dynamique
               final dynamic texteExtrait = parts[0]['text'];
               return texteExtrait?.toString() ?? "Aucun texte trouvé.";
             }
@@ -75,7 +71,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Frigo Recettes',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterialDesign: true,
       ),
       home: const HomePage(),
@@ -93,15 +88,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String _resultat = "Prenez une photo de votre frigo pour commencer !";
   bool _enChargement = false;
-  final Uint8List _imageSimulee = Uint8List(0); 
 
-  Future<void> _envoyerImage() async {
+  void _envoyerImage() async {
     setState(() {
       _enChargement = true;
       _resultat = "Analyse du frigo en cours...";
     });
 
-    final reponseIA = await ApiService.genererRecettes(_imageSimulee);
+    final reponseIA = await ApiService.genererRecettes(Uint8List(0));
 
     setState(() {
       _resultat = reponseIA;
@@ -115,39 +109,20 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text("FrigoRecettes 🍳"),
         centerTitle: true,
-        backgroundColor: const Color(0xFFB2DFDB),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Container(
-              height: 200,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.fastfood, size: 80, color: Colors.grey),
-            ),
             const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: _enChargement ? null : _envoyerImage,
-              icon: const Icon(Icons.auto_awesome),
-              label: const Text("Générer mes recettes"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF009688),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 50),
-              ),
+            ElevatedButton(
+              onPressed: _envoyerImage,
+              child: const Text("Générer mes recettes"),
             ),
             const SizedBox(height: 20),
             _enChargement
                 ? const CircularProgressIndicator()
-                : Text(
-                    _resultat,
-                    style: const TextStyle(fontSize: 16, color: Colors.black87),
-                  ),
+                : SelectableText(_resultat),
           ],
         ),
       ),
